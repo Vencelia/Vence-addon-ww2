@@ -33,4 +33,21 @@ end
 
 function PLAYER:WW2_HasFaction()
     return self:WW2_GetFaction() ~= ""
+
 end
+
+WW2.CLASSES = {
+    [WW2.FACCION.REICH] = {
+        {
+            id = "reich_asalto",
+            nombre = "ASALTO",
+            descripcion = "Avanza y rompe líneas. Obvio.",
+            armas = {
+                "doi_atow_mp40",
+                "doi_atow_p08",
+                "doi_atow_etoolde"
+            },
+            modelo = "models/player/dod_german.mdl"
+        }
+    }
+}
