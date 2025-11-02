@@ -107,11 +107,19 @@ function WW2_AbrirMenu()
         draw.SimpleText(TEXTO_REICH, "WW2_Sub", w*0.5, math.floor(h*0.08), Color(255,240,240), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         draw.SimpleText("Infantería, Panzer, doctrina Blitzkrieg", "WW2_Opcion", w*0.5, h*0.16, Color(255,240,240,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
-    panelIzq.DoClick = function()
-        surface.PlaySound("buttons/button14.wav")
-        ElegirFaccion(WW2.FACCION.REICH)
+    panel.DoClick = function()
+    surface.PlaySound("buttons/button14.wav")
+    if data.faccion == WW2.FACCION.REICH then
+        timer.Simple(0.2, function()
+            WW2_AbrirClases(WW2.FACCION.REICH)
+            if IsValid(frame) then frame:Remove() end
+        end)
+    else
+        ElegirFaccion(data.faccion)
         if IsValid(frame) then frame:Remove() end
     end
+end
+
 
     -- USSR
     local panelDer = vgui.Create("DButton", frame)
@@ -309,4 +317,57 @@ concommand.Add("ww2menu_open", function()
     if IsValid(g_WW2_Menu) then g_WW2_Menu:Remove() end
     WW2_AbrirMenu()
 end)
+
+function WW2_AbrirClases(faccion)
+    local clases = WW2.CLASSES and WW2.CLASSES[faccion] or {}
+    if #clases == 0 then return end
+
+    local scrW, scrH = ScrW(), ScrH()
+    local frame = vgui.Create("DFrame")
+    frame:SetSize(scrW, scrH)
+    frame:Center()
+    frame:SetTitle("")
+    frame:SetDraggable(false)
+    frame:ShowCloseButton(false)
+    frame:MakePopup()
+    frame.Paint = function(self, w, h)
+        PintarBlur(self, 5)
+        surface.SetDrawColor(Color(10,10,10,245)) surface.DrawRect(0, 0, w, h)
+        draw.SimpleText("Selecciona tu clase", "WW2_Titulo", w * 0.5, 80, color_white, TEXT_ALIGN_CENTER)
+    end
+
+    for i, clase in ipairs(clases) do
+        local btn = vgui.Create("DButton", frame)
+        btn:SetSize(scrW * 0.4, scrH * 0.12)
+        btn:SetPos((scrW - btn:GetWide()) / 2, 160 + (i - 1) * (btn:GetTall() + 20))
+        btn:SetText("")
+        btn.Paint = function(self, w, h)
+            surface.SetDrawColor(50,50,50,220) surface.DrawRect(0,0,w,h)
+            surface.SetDrawColor(255,255,255,20) surface.DrawOutlinedRect(0,0,w,h,2)
+            draw.SimpleText(string.upper(clase.nombre), "WW2_Sub", w * 0.5, h * 0.3, color_white, TEXT_ALIGN_CENTER)
+            draw.SimpleText(clase.descripcion, "WW2_Opcion", w * 0.5, h * 0.65, color_white, TEXT_ALIGN_CENTER)
+        end
+        btn.DoClick = function()
+            net.Start("WW2_ElegirClase")
+                net.WriteString(clase.id)
+            net.SendToServer()
+            surface.PlaySound("buttons/button14.wav")
+            if IsValid(frame) then frame:Remove() end
+        end
+    end
+
+    local btnCerrar = vgui.Create("DButton", frame)
+    btnCerrar:SetSize(32, 32)
+    btnCerrar:SetPos(scrW - 40, 8)
+    btnCerrar:SetText("")
+    btnCerrar.Paint = function(self, w, h)
+        surface.SetDrawColor(200, 0, 0, 220)
+        surface.DrawRect(0, 0, w, h)
+        draw.SimpleText("X", "WW2_Sub", w * 0.5, h * 0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    end
+    btnCerrar.DoClick = function()
+        if IsValid(frame) then frame:Remove() end
+    end
+end
+
 
