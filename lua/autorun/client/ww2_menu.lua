@@ -107,19 +107,15 @@ function WW2_AbrirMenu()
         draw.SimpleText(TEXTO_REICH, "WW2_Sub", w*0.5, math.floor(h*0.08), Color(255,240,240), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
         draw.SimpleText("Infantería, Panzer, doctrina Blitzkrieg", "WW2_Opcion", w*0.5, h*0.16, Color(255,240,240,200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
-    panel.DoClick = function()
+    panelIzq.DoClick = function()
     surface.PlaySound("buttons/button14.wav")
-    if data.faccion == WW2.FACCION.REICH then
-        timer.Simple(0.2, function()
-            WW2_AbrirClases(WW2.FACCION.REICH)
-            if IsValid(frame) then frame:Remove() end
-        end)
-    else
-        ElegirFaccion(data.faccion)
-        if IsValid(frame) then frame:Remove() end
-    end
-end
+    ElegirFaccion(WW2.FACCION.REICH)
 
+    timer.Simple(0.2, function()
+        WW2_AbrirClases(WW2.FACCION.REICH)
+        if IsValid(frame) then frame:Remove() end
+    end)
+end
 
     -- USSR
     local panelDer = vgui.Create("DButton", frame)
@@ -369,5 +365,6 @@ function WW2_AbrirClases(faccion)
         if IsValid(frame) then frame:Remove() end
     end
 end
+
 
 
