@@ -64,6 +64,7 @@ end)
 
 -- Elegir facción desde el menú
 net.Receive("WW2_ElegirBando", function(_, ply)
+util.AddNetworkString("WW2_ElegirClase")
     local fac = net.ReadString()
     if not ValidFaction(fac) then return end
 
@@ -89,5 +90,67 @@ net.Receive("WW2_RequestRespawn", function(_, ply)
     -- Solo tiene sentido si está muerto; aun así no hace daño en vivo
     timer.Simple(0.05, function()
         if IsValid(ply) then ply:Spawn() end
+    end)
+end)
+
+net.Receive("WW2_ElegirClase", function(_, ply)
+    local claseID = net.ReadString()
+    local fac = ply:WW2_GetFaction()
+    local clase = nil
+
+    if WW2.CLASSES and WW2.CLASSES[fac] then
+        for _, c in ipairs(WW2.CLASSES[fac]) do
+            if c.id == claseID then
+                clase = c
+                break
+            end
+        end
+    end
+
+    if not clase then return end
+
+    ply:SetPData("WW2_ClaseSeleccionada", claseID)
+    ply:SetModel(clase.modelo or "models/player.mdl")
+    ply:StripWeapons()
+
+    if istable(clase.armas) then
+        for _, wep in ipairs(clase.armas) do
+            ply:Give(wep)
+        end
+    end
+
+    if ply:Alive() then
+        ply:KillSilent()
+        timer.Simple(0.1, function() if IsValid(ply) then ply:Spawn() end end)
+    else
+        timer.Simple(0.1, function() if IsValid(ply) then ply:Spawn() end end)
+    end
+end)
+
+hook.Add("PlayerSpawn", "WW2_AplicarClase", function(ply)
+    local fac = ply:WW2_GetFaction()
+    local claseID = ply:GetPData("WW2_ClaseSeleccionada", "")
+    if not claseID or claseID == "" then return end
+
+    local clase = nil
+    if WW2.CLASSES and WW2.CLASSES[fac] then
+        for _, c in ipairs(WW2.CLASSES[fac]) do
+            if c.id == claseID then
+                clase = c
+                break
+            end
+        end
+    end
+
+    if not clase then return end
+
+    ply:SetModel(clase.modelo or "models/player.mdl")
+    timer.Simple(0.2, function()
+        if not IsValid(ply) then return end
+        if istable(clase.armas) then
+            for _, wep in ipairs(clase.armas) do
+                ply:Give(wep)
+            end
+        end
     end)
 end)
